@@ -270,7 +270,7 @@ export function MobileRouteOptimizer({ orders, vendors, onClose, selectedArea }:
 
                           <div className="space-y-1 mb-3">
                             <p className="font-medium text-gray-900">
-                              {stop.type === "pickup" ? stop.order?.customer.name : stop.vendor?.name}
+                              {stop.type === "pickup" ? stop.order?.customer?.name : stop.vendor?.name}
                             </p>
                             <p className="text-xs text-gray-600">
                               {stop.type === "pickup" ? stop.order?.pickupAddress : stop.vendor?.area}
@@ -294,7 +294,7 @@ export function MobileRouteOptimizer({ orders, vendors, onClose, selectedArea }:
 
                           {/* Action Buttons */}
                           <div className="flex gap-1">
-                            {((stop.type === "pickup" && stop.order?.customer.phone) ||
+                            {((stop.type === "pickup" && stop.order?.customer?.phone) ||
                               (stop.type === "vendor" && stop.vendor?.phone)) && (
                               <>
                                 <Button
@@ -303,8 +303,8 @@ export function MobileRouteOptimizer({ orders, vendors, onClose, selectedArea }:
                                   className="flex-1 text-xs h-7 bg-transparent"
                                   onClick={() => {
                                     const phone =
-                                      stop.type === "pickup" ? stop.order!.customer.phone : stop.vendor!.phone!
-                                    handleCall(phone)
+                                      stop.type === "pickup" ? stop.order?.customer?.phone : stop.vendor?.phone
+                                    if (phone) handleCall(phone)
                                   }}
                                 >
                                   <Phone className="w-3 h-3 mr-1" />
@@ -316,9 +316,9 @@ export function MobileRouteOptimizer({ orders, vendors, onClose, selectedArea }:
                                   className="flex-1 text-xs h-7 bg-transparent"
                                   onClick={() => {
                                     const phone =
-                                      stop.type === "pickup" ? stop.order!.customer.phone : stop.vendor!.phone!
-                                    const name = stop.type === "pickup" ? stop.order!.customer.name : stop.vendor!.name
-                                    handleWhatsApp(phone, name, stop.order?.id)
+                                      stop.type === "pickup" ? stop.order?.customer?.phone : stop.vendor?.phone
+                                    const name = stop.type === "pickup" ? stop.order?.customer?.name : stop.vendor?.name
+                                    if (phone && name) handleWhatsApp(phone, name, stop.order?.id)
                                   }}
                                 >
                                   <MessageCircle className="w-3 h-3 mr-1" />

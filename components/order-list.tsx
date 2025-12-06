@@ -48,7 +48,7 @@ import { SuperhostOrderActions } from "./superhost-order-actions"
 import { AutoVendorAssignment } from "./auto-vendor-assignment"
 import { VendorFilter } from "./vendor-filter"
 import { QuotationGenerator } from "./quotation-generator"
-import { updateOrderStatus } from "@/lib/operations"
+import { updateOrderStatusWithNotification } from "@/lib/operations"
 
 function OrderItem({
   order,
@@ -97,7 +97,7 @@ function OrderItem({
       console.log("🚚 Confirming pickup for order:", order.id, "Row:", order.rowNum)
 
       // Call the database update function with proper error handling
-      const result = await updateOrderStatus(order.rowNum, "picked-up")
+      const result = await updateOrderStatusWithNotification(order.id, "picked-up")
 
       if (result.success) {
         toast({
@@ -108,7 +108,7 @@ function OrderItem({
         // Trigger immediate refresh
         onStatusChange()
       } else {
-        throw new Error(result.error || "Failed to update database")
+        throw new Error(result.message || "Failed to update database")
       }
     } catch (error) {
       console.error("❌ Pickup confirmation error:", error)
@@ -123,7 +123,7 @@ function OrderItem({
   }
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(order.pickupAddress)
+    navigator.clipboard.writeText(order.pickupAddress || '')
     toast({
       title: "📍 Address Copied",
       description: "Pickup address copied to clipboard for navigation.",
@@ -131,7 +131,7 @@ function OrderItem({
   }
 
   const handleNavigation = (app: string) => {
-    const encodedAddress = encodeURIComponent(order.pickupAddress)
+    const encodedAddress = encodeURIComponent(order.pickupAddress || '')
     let url = ""
 
     switch (app) {
@@ -174,16 +174,16 @@ function OrderItem({
   }
 
   const handleChatCustomer = () => {
-    const customerPhone = order.customer.phone
+    const customerPhone = order.customer?.phone || ''
 
-    const message = `Hi ${order.customer.name}, I'm from Klynn Laundry. Could you please send me your pickup location here? It will make it easier for me to come and pick it up.`
+    const message = `Hi ${order.customer?.name || 'Customer'}, I'm from Klynn Laundry. Could you please send me your pickup location here? It will make it easier for me to come and pick it up.`
     const whatsappUrl = `https://wa.me/${customerPhone}?text=${encodeURIComponent(message)}`
 
     try {
       window.open(whatsappUrl, "_blank")
       toast({
         title: "💬 Chat Opened",
-        description: `Opening WhatsApp chat with ${order.customer.name}...`,
+        description: `Opening WhatsApp chat with ${order.customer?.name || 'Customer'}...`,
       })
     } catch (error) {
       toast({
@@ -236,7 +236,7 @@ function OrderItem({
                 {order.status.replace("-", " ")}
               </Badge>
             </div>
-            <p className="text-sm text-gray-600">{order.customer.name}</p>
+            <p className="text-sm text-gray-600">{order.customer?.name || 'Unknown'}</p>
           </div>
           {isOpen ? (
             <ChevronUp className="w-5 h-5 text-gray-500 ml-2" />
@@ -249,11 +249,11 @@ function OrderItem({
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
                 <User className="w-4 h-4 text-gray-500" />
-                <span>{order.customer.name}</span>
+                <span>{order.customer?.name || 'Unknown'}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-gray-500" />
-                <span>{maskPhoneNumber(order.customer.phone)}</span>
+                <span>{maskPhoneNumber(order.customer?.phone || '')}</span>
               </div>
 
               {/* Enhanced Pickup Address Section - Available for both riders and superhosts */}
@@ -732,8 +732,8 @@ export function OrderList({
   const finalFilteredOrders = useMemo(() => {
     return filteredByVendor.filter(
       (order) =>
-        order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customer.phone.includes(searchTerm) ||
+        order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer?.phone?.includes(searchTerm) ||
         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (order.assignedVendor && order.assignedVendor.toLowerCase().includes(searchTerm.toLowerCase())),
     )

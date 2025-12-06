@@ -142,3 +142,8 @@ export async function updateOrderStatus(orderId: string, newStatus: string): Pro
 export async function fetchOrdersFromSheet(): Promise<Order[]> {
   return getOrders(null) // Now fetches from Supabase
 }
+
+export interface Vendor {
+  name: string
+  color: string
+}

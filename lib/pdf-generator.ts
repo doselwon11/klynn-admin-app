@@ -84,14 +84,14 @@ export const generatePdf = async (order: Order) => {
     doc.text("Name:", 15, 52)
     doc.setFont("helvetica", "bold")
     doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
-    doc.text(order.customer.name, 15, 58)
+    doc.text(order.customer?.name || 'N/A', 15, 58)
 
     doc.setFont("helvetica", "normal")
     doc.setTextColor(lightGray[0], lightGray[1], lightGray[2])
     doc.text("Phone:", 15, 68)
     doc.setFont("helvetica", "bold")
     doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
-    doc.text(maskPhoneNumber(order.customer.phone), 15, 74)
+    doc.text(maskPhoneNumber(order.customer?.phone || ''), 15, 74)
 
     // QR Codes section - moved up significantly to fit within page
     doc.setFontSize(14)
@@ -100,13 +100,13 @@ export const generatePdf = async (order: Order) => {
     doc.text("SCAN QR CODES", 15, 88)
 
     // Generate QR codes
-    const qr1Message = `Order ${order.customer.name} ${order.id} picked up by rider.`
+    const qr1Message = `Order ${order.customer?.name || 'Customer'} ${order.id} picked up by rider.`
     const qr1Link = `https://wa.me/60173363747?text=${encodeURIComponent(qr1Message)}`
 
-    const customerPhone = order.customer.phone.startsWith("60")
+    const customerPhone = order.customer?.phone?.startsWith("60")
       ? order.customer.phone
-      : `60${order.customer.phone.substring(1)}`
-    const qr2Message = `Hi ${order.customer.name}! Your bag has been picked up by Klynn. Sit tight while we KLYNN it.`
+      : `60${order.customer?.phone?.substring(1) || ''}`
+    const qr2Message = `Hi ${order.customer?.name || 'Customer'}! Your bag has been picked up by Klynn. Sit tight while we KLYNN it.`
     const qr2Link = `https://wa.me/${customerPhone}?text=${encodeURIComponent(qr2Message)}`
 
     const qr1Image = await generateQrCode(qr1Link)

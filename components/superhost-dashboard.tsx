@@ -66,10 +66,10 @@ export function SuperhostDashboard({ orders, onStatusChange }: SuperhostDashboar
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
-          order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.customer.phone.includes(searchTerm) ||
+          order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.customer?.phone?.includes(searchTerm) ||
           order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.pickupAddress.toLowerCase().includes(searchTerm.toLowerCase()),
+          order.pickupAddress?.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
 
@@ -81,7 +81,7 @@ export function SuperhostDashboard({ orders, onStatusChange }: SuperhostDashboar
       switch (dateFilter) {
         case "today":
           filterDate.setHours(0, 0, 0, 0)
-          filtered = filtered.filter((order) => new Date(order.pickupDate) >= filterDate)
+          filtered = filtered.filter((order) => order.pickupDate && new Date(order.pickupDate) >= filterDate)
           break
         case "yesterday":
           filterDate.setDate(today.getDate() - 1)
@@ -89,17 +89,18 @@ export function SuperhostDashboard({ orders, onStatusChange }: SuperhostDashboar
           const yesterdayEnd = new Date(filterDate)
           yesterdayEnd.setHours(23, 59, 59, 999)
           filtered = filtered.filter((order) => {
+            if (!order.pickupDate) return false
             const orderDate = new Date(order.pickupDate)
             return orderDate >= filterDate && orderDate <= yesterdayEnd
           })
           break
         case "week":
           filterDate.setDate(today.getDate() - 7)
-          filtered = filtered.filter((order) => new Date(order.pickupDate) >= filterDate)
+          filtered = filtered.filter((order) => order.pickupDate && new Date(order.pickupDate) >= filterDate)
           break
         case "month":
           filterDate.setMonth(today.getMonth() - 1)
-          filtered = filtered.filter((order) => new Date(order.pickupDate) >= filterDate)
+          filtered = filtered.filter((order) => order.pickupDate && new Date(order.pickupDate) >= filterDate)
           break
       }
     }

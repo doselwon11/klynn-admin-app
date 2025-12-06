@@ -25,7 +25,7 @@ export function VendorHistory({ orders, onRefresh }: VendorHistoryProps) {
 
     const today = new Date()
     const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const weeklyProcessed = processed.filter((order) => new Date(order.pickupDate) >= thisWeek)
+    const weeklyProcessed = processed.filter((order) => order.pickupDate && new Date(order.pickupDate) >= thisWeek)
 
     return {
       totalProcessed: processed.length,
@@ -43,8 +43,8 @@ export function VendorHistory({ orders, onRefresh }: VendorHistoryProps) {
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
-          order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.customer.phone.includes(searchTerm) ||
+          order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.customer?.phone?.includes(searchTerm) ||
           order.id.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
@@ -62,10 +62,13 @@ export function VendorHistory({ orders, onRefresh }: VendorHistoryProps) {
           break
       }
 
-      filtered = filtered.filter((order) => new Date(order.pickupDate) >= filterDate)
+      filtered = filtered.filter((order) => order.pickupDate && new Date(order.pickupDate) >= filterDate)
     }
 
-    return filtered.sort((a, b) => new Date(b.pickupDate).getTime() - new Date(a.pickupDate).getTime())
+    return filtered.sort((a, b) => {
+      if (!a.pickupDate || !b.pickupDate) return 0
+      return new Date(b.pickupDate).getTime() - new Date(a.pickupDate).getTime()
+    })
   }, [orders, searchTerm, dateFilter])
 
   return (

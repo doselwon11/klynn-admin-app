@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Order } from "@/lib/data"
 import { useState, useEffect } from "react"
 import { useToast } from "./ui/use-toast"
-import { updateRiderFields } from "@/lib/operations"
+import { updateRiderFieldsClient } from "@/lib/operations-client"
 import { Loader2, User, MapPin, CreditCard, IdCard } from "lucide-react"
 
 const regions = [
@@ -76,7 +76,7 @@ export function EditRiderFieldsDialog({
   const handleSave = async () => {
     setIsSaving(true)
     
-    const result = await updateRiderFields(order.rowNum, {
+    const result = await updateRiderFieldsClient(order.id, {
       saRiderName,
       rdRiderName,
       region,

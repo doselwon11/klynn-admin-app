@@ -33,7 +33,7 @@ export function RouteOptimizer({ orders, userLocation, onRouteOptimized, onClose
       // Convert orders to destinations
       const destinations: RouteDestination[] = orders.map((order) => ({
         location: [3.139 + Math.random() * 0.1, 101.6869 + Math.random() * 0.1], // Mock coordinates
-        name: `${order.customer.name} - ${order.id}`,
+        name: `${order.customer?.name || 'Customer'} - ${order.id}`,
         type: "customer" as const,
       }))
 

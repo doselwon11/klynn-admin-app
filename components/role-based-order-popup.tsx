@@ -10,7 +10,7 @@ import { UserContext } from "@/context/user-provider"
 import type { Order } from "@/lib/data"
 import type { Vendor } from "@/lib/vendors"
 import { getVendors, findOptimalVendor, calculateDistance } from "@/lib/vendors"
-import { updateOrderStatus, assignVendor } from "@/lib/operations"
+import { updateOrderStatusWithNotification, assignVendor } from "@/lib/operations"
 
 interface RoleBasedOrderPopupProps {
   order: Order
@@ -80,7 +80,7 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
         return true
       case "rider":
         const deliveryStatuses = ["picked-up", "out-for-delivery", "delivered"]
-        return deliveryStatuses.includes(order.status.toLowerCase()) || order.assignedRider === user.name
+        return deliveryStatuses.includes(order.status.toLowerCase()) || order.riderId === user.name || order.saRiderName === user.name || order.rdRiderName === user.name
       case "vendor":
         return order.assignedVendor === user.name
       default:
@@ -91,7 +91,7 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
   // Load vendors (only for superhost)
   useEffect(() => {
     const loadVendors = async () => {
-      if (!user.role === "superhost") {
+      if (user.role !== "superhost") {
         setIsLoadingVendors(false)
         return
       }
@@ -148,7 +148,7 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
       // Update vendor assignment if changed (superhost only)
       if (canAssignVendors && selectedVendor && selectedVendor !== order.assignedVendor) {
         console.log(`🏭 Assigning vendor: ${selectedVendor} to row ${order.rowNum}`)
-        const vendorResult = await assignVendor(order.rowNum, selectedVendor)
+        const vendorResult = await assignVendor(order.id, selectedVendor)
         updates.push(vendorResult)
         console.log(`🏭 Vendor assignment result:`, vendorResult)
       }
@@ -156,7 +156,7 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
       // Update status if changed and user has permission
       if (canUpdateStatus && selectedStatus !== order.status) {
         console.log(`📊 Updating status: ${selectedStatus} for row ${order.rowNum}`)
-        const statusResult = await updateOrderStatus(order.rowNum, selectedStatus)
+        const statusResult = await updateOrderStatusWithNotification(order.id, selectedStatus)
         updates.push(statusResult)
         console.log(`📊 Status update result:`, statusResult)
       }
@@ -186,12 +186,12 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
   }
 
   const handleCall = () => {
-    window.open(`tel:${order.customer.phone}`, "_self")
+    window.open(`tel:${order.customer?.phone}`, "_self")
   }
 
   const handleWhatsApp = () => {
-    const message = `Hi ${order.customer.name}, this is Klynn Partners (${user.name}). We're updating you on your laundry order ${order.id}. Thank you!`
-    const whatsappUrl = `https://wa.me/${order.customer.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`
+    const message = `Hi ${order.customer?.name || 'Customer'}, this is Klynn Partners (${user.name}). We're updating you on your laundry order ${order.id}. Thank you!`
+    const whatsappUrl = `https://wa.me/${order.customer?.phone?.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, "_blank")
   }
 
@@ -244,8 +244,8 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
         <CardContent className="p-4 overflow-y-auto">
           {/* Customer Info */}
           <div className="mb-4">
-            <h3 className="font-bold text-lg text-gray-900 mb-1">{order.customer.name}</h3>
-            <p className="text-sm text-gray-600 mb-2">{order.customer.phone}</p>
+            <h3 className="font-bold text-lg text-gray-900 mb-1">{order.customer?.name}</h3>
+            <p className="text-sm text-gray-600 mb-2">{order.customer?.phone}</p>
             <p className="text-sm text-gray-700 leading-relaxed">{order.pickupAddress}</p>
             {order.coordinates && (
               <p className="text-xs text-gray-500 mt-1 font-mono">

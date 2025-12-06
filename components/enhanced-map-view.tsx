@@ -47,6 +47,7 @@ export function EnhancedMapView({ orders, vendors, userRole, onOrderUpdate }: En
         })
 
         // Initialize map centered on KL
+        if (!mapRef.current) return
         const map = L.map(mapRef.current).setView([3.139, 101.6869], 11)
 
         // Add tile layer
@@ -86,7 +87,7 @@ export function EnhancedMapView({ orders, vendors, userRole, onOrderUpdate }: En
         const filteredOrders = orders.filter((order) => {
           const matchesSearch =
             !searchTerm ||
-            order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (order.assignedVendor && order.assignedVendor.toLowerCase().includes(searchTerm.toLowerCase()))
 
@@ -123,7 +124,7 @@ export function EnhancedMapView({ orders, vendors, userRole, onOrderUpdate }: En
           const popupContent = `
             <div class="p-2">
               <h3 class="font-bold text-sm">${order.id}</h3>
-              <p class="text-xs text-gray-600">${order.customer.name}</p>
+              <p class="text-xs text-gray-600">${order.customer?.name || 'Unknown'}</p>
               <p class="text-xs text-gray-500">${order.pickupAddress}</p>
               <div class="mt-2">
                 <span class="inline-block px-2 py-1 text-xs rounded" style="background-color: ${iconColor}20; color: ${iconColor};">
@@ -170,10 +171,8 @@ export function EnhancedMapView({ orders, vendors, userRole, onOrderUpdate }: En
             const popupContent = `
               <div class="p-2">
                 <h3 class="font-bold text-sm">${vendor.name}</h3>
-                <p class="text-xs text-gray-600">${vendor.area}</p>
-                <p class="text-xs text-gray-500">${vendor.service}</p>
-                <p class="text-xs mt-1"><strong>Rate:</strong> RM${vendor.ratePerKg}/kg</p>
-                <p class="text-xs"><strong>Phone:</strong> ${vendor.phone}</p>
+                <p class="text-xs text-gray-600">Vendor</p>
+                <p class="text-xs text-gray-500">${vendor.name}</p>
               </div>
             `
 
@@ -212,7 +211,7 @@ export function EnhancedMapView({ orders, vendors, userRole, onOrderUpdate }: En
       // Convert to destinations
       const destinations: RouteDestination[] = approvedOrders.map((order) => ({
         location: [3.139 + Math.random() * 0.1, 101.6869 + Math.random() * 0.1] as [number, number],
-        name: `${order.customer.name} - ${order.id}`,
+        name: `${order.customer?.name || 'Unknown'} - ${order.id}`,
         type: "customer" as const,
       }))
 
@@ -263,7 +262,7 @@ export function EnhancedMapView({ orders, vendors, userRole, onOrderUpdate }: En
     return orders.filter((order) => {
       const matchesSearch =
         !searchTerm ||
-        order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (order.assignedVendor && order.assignedVendor.toLowerCase().includes(searchTerm.toLowerCase()))
 
@@ -405,8 +404,7 @@ export function EnhancedMapView({ orders, vendors, userRole, onOrderUpdate }: En
             setIsPopupOpen(false)
             setSelectedOrder(null)
           }}
-          userRole={userRole}
-          onUpdate={onOrderUpdate}
+          onUpdate={onOrderUpdate || (() => {})}
         />
       )}
     </div>

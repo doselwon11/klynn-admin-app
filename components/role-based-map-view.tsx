@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Shield, Eye, EyeOff, Users, Building2, Truck } from "lucide-react"
 import { UserContext } from "@/context/user-provider"
 import { useContext } from "react"
-import type { Order } from "@/lib/data"
-import type { Vendor } from "@/lib/vendors"
+import type { Order, Vendor } from "@/lib/data"
 
 interface RoleBasedMapViewProps {
   orders: Order[]
@@ -34,7 +33,7 @@ const filterOrdersByRole = (orders: Order[], userRole: string, userName: string)
       return orders.filter((order) => {
         const deliveryStatuses = ["picked-up", "out-for-delivery", "delivered"]
         const isInDeliveryPhase = deliveryStatuses.includes(order.status.toLowerCase())
-        const isAssignedToRider = order.assignedRider === userName
+        const isAssignedToRider = order.riderId === userName || order.saRiderName === userName || order.rdRiderName === userName
         return isInDeliveryPhase || isAssignedToRider
       })
 
@@ -269,21 +268,14 @@ export function RoleBasedMapView({
         {viewMode === "map" ? (
           <EnhancedMapView
             orders={filteredOrders}
-            selectedArea={selectedArea}
-            onOrderUpdate={onOrderUpdate}
-            onRouteOptimize={permissions.canOptimizeRoutes ? onRouteOptimize : undefined}
+            vendors={filteredVendors}
             userRole={user.role}
-            userPermissions={permissions}
+            onOrderUpdate={onOrderUpdate}
           />
         ) : (
           <MobileOrderList
             orders={filteredOrders}
-            vendors={filteredVendors}
-            onOrderClick={() => {}} // Handle order click
-            selectedArea={selectedArea}
-            userLocation={userLocation}
-            userRole={user.role}
-            userPermissions={permissions}
+            onStatusChange={onOrderUpdate}
           />
         )}
       </div>

@@ -16,7 +16,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useToast } from "./ui/use-toast"
-import { updateOrderStatus, updateOrderStatusWithNotification, updateOrderPrice, assignVendor, addNewVendor } from "@/lib/operations"
+import { updateOrderStatusWithNotification, updateOrderPrice, assignVendor, addNewVendor } from "@/lib/operations"
 import { getVendors, findNearestVendor, type Vendor } from "@/lib/vendors"
 import type { Order } from "@/lib/data"
 import { Edit, DollarSign, Building2, Plus, Loader2, Zap, AlertCircle, RefreshCw, Lock, Info, Save } from "lucide-react"
@@ -94,7 +94,7 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
 
       // Only suggest vendor if order doesn't have one and is in assignable state
       if (!order.assignedVendor && canAssignVendor) {
-        const customerPostcode = order.pickupAddress.match(/\d{5}/)?.[0] || ""
+        const customerPostcode = order.pickupAddress?.match(/\d{5}/)?.[0] || ""
 
         let suggested: any = null
 
@@ -169,15 +169,15 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
 
       // If changing to approved, use the notification function
       if (newStatus === "approved") {
-        updateOrderStatusWithNotification(order.rowNum, newStatus, {
-          pickupAddress: order.pickupAddress,
+        updateOrderStatusWithNotification(order.id, newStatus, {
+          pickupAddress: order.pickupAddress || "",
           postcode: order.postcode || "",
           deliveryType: order.deliveryType || order.service || "Standard",
           orderType: order.orderType || "Regular",
           riderFee: order.riderFee,
           riderPayout: order.riderPayout,
-          date: order.pickupDate,
-        }).then((result) => {
+          date: order.pickupDate || "",
+        }).then((result: { success: boolean; message: string }) => {
           if (!result.success) {
             toast({
               title: "⚠️ Sync Warning",
@@ -193,7 +193,7 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
         })
       } else {
         // For other statuses, use regular update
-        updateOrderStatus(order.rowNum, newStatus).then((result) => {
+        updateOrderStatusWithNotification(order.id, newStatus).then((result: { success: boolean; message: string }) => {
           if (!result.success) {
             toast({
               title: "⚠️ Sync Warning",
@@ -234,7 +234,7 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
 
     setIsUpdating("price")
     try {
-      const result = await updateOrderPrice(order.rowNum, finalPrice)
+      const result = await updateOrderPrice(order.id, finalPrice)
       if (result.success) {
         toast({
           title: "✅ Price Updated",
@@ -276,7 +276,7 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
       onUpdate()
 
       // Send to webhook asynchronously
-      assignVendor(order.rowNum, selectedVendor).then((result) => {
+      assignVendor(order.id, selectedVendor).then((result: { success: boolean; message: string }) => {
         if (!result.success) {
           toast({
             title: "⚠️ Sync Warning",
@@ -308,7 +308,7 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
 
     setIsUpdating("add-vendor")
     try {
-      const result = await addNewVendor(order.rowNum, newVendor)
+      const result = await addNewVendor(order.id, newVendor)
       if (result.success) {
         toast({
           title: "✅ Vendor Added Successfully",

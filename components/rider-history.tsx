@@ -28,7 +28,7 @@ export function RiderHistory({ orders, onRefresh }: RiderHistoryProps) {
 
     const today = new Date()
     const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const weeklyPickups = pickedUp.filter((order) => new Date(order.pickupDate) >= thisWeek)
+    const weeklyPickups = pickedUp.filter((order) => order.pickupDate && new Date(order.pickupDate) >= thisWeek)
 
     return {
       totalPickups: pickedUp.length,
@@ -46,10 +46,10 @@ export function RiderHistory({ orders, onRefresh }: RiderHistoryProps) {
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
-          order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.customer.phone.includes(searchTerm) ||
+          order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.customer?.phone?.includes(searchTerm) ||
           order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.pickupAddress.toLowerCase().includes(searchTerm.toLowerCase()),
+          order.pickupAddress?.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
 
@@ -66,10 +66,14 @@ export function RiderHistory({ orders, onRefresh }: RiderHistoryProps) {
           break
       }
 
-      filtered = filtered.filter((order) => new Date(order.pickupDate) >= filterDate)
+      filtered = filtered.filter((order) => order.pickupDate && new Date(order.pickupDate) >= filterDate)
     }
 
-    return filtered.sort((a, b) => new Date(b.pickupDate).getTime() - new Date(a.pickupDate).getTime())
+    return filtered.sort((a, b) => {
+      const dateA = a.pickupDate ? new Date(a.pickupDate).getTime() : 0
+      const dateB = b.pickupDate ? new Date(b.pickupDate).getTime() : 0
+      return dateB - dateA
+    })
   }, [orders, searchTerm, dateFilter])
 
   return (

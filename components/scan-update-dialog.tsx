@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "./ui/use-toast"
-import { updateOrderStatus, sendRiderNotification } from "@/lib/operations"
+import { updateOrderStatusWithNotification } from "@/lib/operations"
 import { Loader2 } from "lucide-react"
 
 interface ScannedOrderData {
@@ -48,25 +48,22 @@ export function ScanUpdateDialog({ scannedOrder, onClose, onStatusChange }: Scan
     }
 
     setIsSaving(true)
-    const result = await updateOrderStatus(scannedOrder.rowNum, newStatus)
+    
+    // Prepare order data for notification if status is approved
+    const orderData = newStatus === "approved" && scannedOrder.pickupAddress ? {
+      pickupAddress: scannedOrder.pickupAddress,
+      postcode: scannedOrder.postcode || scannedOrder.pickupAddress.match(/\d{5}/)?.[0] || "",
+      deliveryType: scannedOrder.deliveryType || "Standard",
+      orderType: scannedOrder.orderType || "Regular",
+      riderFee: scannedOrder.riderFee,
+      riderPayout: scannedOrder.riderPayout,
+      date: scannedOrder.date || new Date().toISOString().split("T")[0],
+    } : undefined
+    
+    const result = await updateOrderStatusWithNotification(scannedOrder.id, newStatus, orderData)
     
     if (result.success) {
-      // If status changed to approved and we have order data, send rider notification
-      if (newStatus === "approved" && scannedOrder.pickupAddress) {
-        const postcode = scannedOrder.postcode || scannedOrder.pickupAddress.match(/\d{5}/)?.[0] || ""
-        // Use riderFee first (from Google Sheet), fallback to riderPayout
-        const riderPayoutValue = scannedOrder.riderFee ?? scannedOrder.riderPayout ?? 0
-        
-        await sendRiderNotification({
-          action: "approve_payment",
-          "pickup-address": scannedOrder.pickupAddress,
-          postcode: postcode,
-          "delivery-type": scannedOrder.deliveryType || "Standard",
-          order_type: scannedOrder.orderType || "Regular",
-          rider_payout: riderPayoutValue > 0 ? riderPayoutValue.toFixed(2) : "0.00",
-          date: scannedOrder.date || new Date().toISOString().split("T")[0],
-        })
-        
+      if (newStatus === "approved" && orderData) {
         toast({ 
           title: "✅ Status Updated & Riders Notified", 
           description: `Order ${scannedOrder.id} is now ${newStatus}. Riders notified via Telegram.` 

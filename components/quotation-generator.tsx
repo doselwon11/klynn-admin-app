@@ -235,9 +235,9 @@ export function QuotationGenerator({ isOpen, setIsOpen, order }: QuotationGenera
       const quotationNo = generateQuotationNumber()
 
       // Extract postcode from pickup address
-      const postcodeMatch = order.pickupAddress.match(/\d{5}/)
+      const postcodeMatch = order.pickupAddress?.match(/\d{5}/)
       const postcode = postcodeMatch ? postcodeMatch[0] : ""
-      const address = order.pickupAddress.replace(`, ${postcode}`, "").trim()
+      const address = (order.pickupAddress || '').replace(`, ${postcode}`, "").trim()
 
       // Auto-generate service items based on order service data
       const autoServiceItems = getServiceFromOrderData(order.service || "")
@@ -246,8 +246,8 @@ export function QuotationGenerator({ isOpen, setIsOpen, order }: QuotationGenera
         ...prev,
         quotationNo,
         billTo: {
-          name: order.customer.name,
-          phone: order.customer.phone,
+          name: order.customer?.name || '',
+          phone: order.customer?.phone || '',
           email: "",
         },
         shipTo: {
@@ -437,7 +437,7 @@ export function QuotationGenerator({ isOpen, setIsOpen, order }: QuotationGenera
     setIsUpdatingPrice(true)
     try {
       const { updateOrderPrice } = await import("@/lib/operations")
-      const result = await updateOrderPrice(order.rowNum, calculations.total.toFixed(2))
+      const result = await updateOrderPrice(order.id, calculations.total.toFixed(2))
 
       if (result.success) {
         toast({

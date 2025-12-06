@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { UserContext } from "@/context/user-provider"
-import { updateOrderInSheet } from "@/lib/operations"
+import { updateOrderStatusWithNotification, updateOrderPrice } from "@/lib/operations"
 import { getVendors, type Vendor } from "@/lib/vendors"
 import { assignVendor } from "@/lib/operations"
 import {
@@ -144,7 +144,7 @@ export function OrderPopup({ order, isOpen, onClose, onUpdate }: OrderPopupProps
       // Handle vendor assignment first if changed
       if (hasVendorChange) {
         console.log("🏭 Assigning vendor:", formData.vendor, "to row:", order.rowNum)
-        const vendorResult = await assignVendor(order.rowNum, formData.vendor)
+        const vendorResult = await assignVendor(order.id, formData.vendor)
         if (!vendorResult.success) {
           alert(`Failed to assign vendor: ${vendorResult.message}`)
           setIsUpdating(false)
@@ -152,12 +152,23 @@ export function OrderPopup({ order, isOpen, onClose, onUpdate }: OrderPopupProps
         }
       }
 
-      // Handle other updates if any
-      if (Object.keys(updates).length > 0) {
-        console.log("🔄 Updating order:", order.id, "Row:", order.rowNum, "Updates:", updates)
-        const success = await updateOrderInSheet(order.rowNum, updates)
-        if (!success) {
-          alert("Failed to update order. Please try again.")
+      // Handle status update
+      if (updates.status) {
+        console.log("🔄 Updating status:", order.id, "New status:", updates.status)
+        const statusResult = await updateOrderStatusWithNotification(order.id, updates.status)
+        if (!statusResult.success) {
+          alert(`Failed to update status: ${statusResult.message}`)
+          setIsUpdating(false)
+          return
+        }
+      }
+
+      // Handle price update
+      if (updates.price) {
+        console.log("💰 Updating price:", order.id, "New price:", updates.price)
+        const priceResult = await updateOrderPrice(order.id, updates.price)
+        if (!priceResult.success) {
+          alert(`Failed to update price: ${priceResult.message}`)
           setIsUpdating(false)
           return
         }
@@ -181,8 +192,8 @@ export function OrderPopup({ order, isOpen, onClose, onUpdate }: OrderPopupProps
   }
 
   // Create WhatsApp message
-  const whatsappPhone = formatPhoneForWhatsApp(order.customer.phone)
-  const whatsappMessage = `Hi ${order.customer.name}, this is Klynn Partners regarding your laundry order ${order.id}. Thank you!`
+  const whatsappPhone = formatPhoneForWhatsApp(order.customer?.phone || '')
+  const whatsappMessage = `Hi ${order.customer?.name || 'Customer'}, this is Klynn Partners regarding your laundry order ${order.id}. Thank you!`
   const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`
 
   // Get current status color
@@ -203,11 +214,11 @@ export function OrderPopup({ order, isOpen, onClose, onUpdate }: OrderPopupProps
           {/* Order Header */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-lg">{order.customer.name}</h3>
+              <h3 className="font-semibold text-lg">{order.customer?.name || 'Unknown'}</h3>
               <Badge className={statusColor}>{order.status}</Badge>
             </div>
             <p className="text-sm text-gray-600 font-mono mb-1">{order.id}</p>
-            <p className="text-sm text-gray-600">{formatPhoneForDisplay(order.customer.phone)}</p>
+            <p className="text-sm text-gray-600">{formatPhoneForDisplay(order.customer?.phone || '')}</p>
           </div>
 
           {/* Order Info */}
@@ -274,7 +285,7 @@ export function OrderPopup({ order, isOpen, onClose, onUpdate }: OrderPopupProps
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(`tel:${order.customer.phone}`, "_self")}
+              onClick={() => window.open(`tel:${order.customer?.phone}`, "_self")}
               className="text-sm"
             >
               <Phone className="w-4 h-4 mr-2" />

@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react"
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import { Icon, divIcon } from "leaflet"
-import { OrderPopup } from "./order-popup"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import type { Order } from "@/lib/data"
 import "leaflet/dist/leaflet.css"
 
@@ -126,13 +127,13 @@ export default function InteractiveMap({ orders, center, zoom, isLoading, onOrde
   const ordersWithCoords = orders
     .map((order) => {
       // Try to get coordinates from order data or generate from postcode
-      const coords = generateCoordinatesFromPostcode(order.pickupAddress)
+      const coords = generateCoordinatesFromPostcode(order.pickupAddress || '')
       return {
         ...order,
-        coordinates: coords,
+        coordinates: coords || undefined,
       }
     })
-    .filter((order) => order.coordinates !== null)
+    .filter((order) => order.coordinates !== null && order.coordinates !== undefined)
 
   if (isLoading) {
     return (
@@ -157,7 +158,38 @@ export default function InteractiveMap({ orders, center, zoom, isLoading, onOrde
       {ordersWithCoords.map((order) => (
         <Marker key={order.id} position={order.coordinates as [number, number]} icon={createOrderMarker(order)}>
           <Popup maxWidth={300} className="custom-popup">
-            <OrderPopup order={order} onUpdate={onOrderUpdate} />
+            <div className="p-2 min-w-[250px]">
+              <div className="mb-2">
+                <h3 className="font-semibold text-sm">{order.customer?.name || 'Unknown'}</h3>
+                <p className="text-xs text-gray-600">{order.id}</p>
+                <Badge className="text-xs mt-1">{order.status}</Badge>
+              </div>
+              <div className="text-xs text-gray-700 mb-2">
+                <p>{order.pickupAddress}</p>
+                <p>{order.pickupDate}</p>
+              </div>
+              <div className="flex gap-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-xs h-6 px-2"
+                  onClick={() => window.open(`tel:${order.customer?.phone}`, '_self')}
+                >
+                  Call
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-xs h-6 px-2"
+                  onClick={() => {
+                    const message = `Hi ${order.customer?.name}, this is regarding your order ${order.id}`
+                    window.open(`https://wa.me/${order.customer?.phone?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank')
+                  }}
+                >
+                  WhatsApp
+                </Button>
+              </div>
+            </div>
           </Popup>
         </Marker>
       ))}

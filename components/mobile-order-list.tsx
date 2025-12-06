@@ -35,7 +35,7 @@ import type { Order } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/components/ui/use-toast"
 import { useUser } from "@/hooks/use-user"
-import { updateOrderStatus } from "@/lib/operations"
+import { updateOrderStatusWithNotification } from "@/lib/operations"
 import { maskPhoneNumber, formatPhoneForWhatsApp } from "@/lib/client-utils"
 import { EditRiderFieldsDialog } from "./edit-rider-fields-dialog"
 
@@ -80,7 +80,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
       console.log("🚚 Confirming pickup for order:", order.id, "Row:", order.rowNum)
 
       // Call the database update function with proper error handling
-      const result = await updateOrderStatus(order.rowNum, "picked-up")
+      const result = await updateOrderStatusWithNotification(order.id, "picked-up")
 
       if (result.success) {
         toast({
@@ -91,7 +91,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
         // Trigger immediate refresh
         onStatusChange()
       } else {
-        throw new Error(result.error || "Failed to update database")
+        throw new Error(result.message || "Failed to update database")
       }
     } catch (error) {
       console.error("❌ Pickup confirmation error:", error)
@@ -106,7 +106,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
   }
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(order.pickupAddress)
+    navigator.clipboard.writeText(order.pickupAddress || '')
     toast({
       title: "📍 Address Copied",
       description: "Pickup address copied to clipboard for navigation.",
@@ -114,7 +114,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
   }
 
   const handleNavigation = (app: string) => {
-    const encodedAddress = encodeURIComponent(order.pickupAddress)
+    const encodedAddress = encodeURIComponent(order.pickupAddress || '')
     let url = ""
 
     switch (app) {
@@ -151,15 +151,15 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
   }
 
   const handleChatCustomer = () => {
-    const customerPhone = formatPhoneForWhatsApp(order.customer.phone)
-    const message = `Hi ${order.customer.name}, I'm from Klynn Laundry. Could you please send me your pickup location here? It will make it easier for me to come and pick it up.`
+    const customerPhone = formatPhoneForWhatsApp(order.customer?.phone || '')
+    const message = `Hi ${order.customer?.name || 'Customer'}, I'm from Klynn Laundry. Could you please send me your pickup location here? It will make it easier for me to come and pick it up.`
     const whatsappUrl = `https://wa.me/${customerPhone}?text=${encodeURIComponent(message)}`
 
     try {
       window.open(whatsappUrl, "_blank")
       toast({
         title: "💬 Chat Opened",
-        description: `Opening WhatsApp chat with ${order.customer.name}...`,
+        description: `Opening WhatsApp chat with ${order.customer?.name || 'Customer'}...`,
       })
     } catch (error) {
       toast({
@@ -209,7 +209,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
               {order.status.replace("-", " ")}
             </Badge>
           </div>
-          <p className="text-sm text-gray-600 truncate">{order.customer.name}</p>
+          <p className="text-sm text-gray-600 truncate">{order.customer?.name || 'Unknown'}</p>
           <p className="text-xs text-gray-500 truncate">{order.pickupAddress}</p>
         </div>
         {isOpen ? (
@@ -224,11 +224,11 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-3">
               <User className="w-4 h-4 text-gray-500 shrink-0" />
-              <span className="truncate">{order.customer.name}</span>
+              <span className="truncate">{order.customer?.name || 'Unknown'}</span>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="w-4 h-4 text-gray-500 shrink-0" />
-              <span className="truncate">{maskPhoneNumber(order.customer.phone)}</span>
+              <span className="truncate">{maskPhoneNumber(order.customer?.phone || '')}</span>
             </div>
 
             {/* Enhanced Address Section */}
@@ -522,8 +522,8 @@ export function MobileOrderList({ orders, onStatusChange = () => {} }: MobileOrd
   const filteredOrders = useMemo(() => {
     return orders.filter(
       (order) =>
-        order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customer.phone.includes(searchTerm) ||
+        order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer?.phone?.includes(searchTerm) ||
         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (order.assignedVendor && order.assignedVendor.toLowerCase().includes(searchTerm.toLowerCase())),
     )

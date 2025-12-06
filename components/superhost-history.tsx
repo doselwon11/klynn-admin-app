@@ -48,8 +48,8 @@ export function SuperhostHistory({ orders, onRefresh }: SuperhostHistoryProps) {
     const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
     const thisMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-    const weeklyOrders = orders.filter((order) => new Date(order.pickupDate) >= thisWeek)
-    const monthlyOrders = orders.filter((order) => new Date(order.pickupDate) >= thisMonth)
+    const weeklyOrders = orders.filter((order) => order.pickupDate && new Date(order.pickupDate) >= thisWeek)
+    const monthlyOrders = orders.filter((order) => order.pickupDate && new Date(order.pickupDate) >= thisMonth)
 
     const completedOrders = orders.filter((order) => order.status === "delivered")
     const cancelledOrders = orders.filter((order) => order.status === "cancelled" || order.status === "cancel")
@@ -82,8 +82,8 @@ export function SuperhostHistory({ orders, onRefresh }: SuperhostHistoryProps) {
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
-          order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.customer.phone.includes(searchTerm) ||
+          order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.customer?.phone?.includes(searchTerm) ||
           order.id.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
@@ -105,11 +105,14 @@ export function SuperhostHistory({ orders, onRefresh }: SuperhostHistoryProps) {
       }
 
       if (dateFilter !== "all") {
-        filtered = filtered.filter((order) => new Date(order.pickupDate) >= filterDate)
+        filtered = filtered.filter((order) => order.pickupDate && new Date(order.pickupDate) >= filterDate)
       }
     }
 
-    return filtered.sort((a, b) => new Date(b.pickupDate).getTime() - new Date(a.pickupDate).getTime())
+    return filtered.sort((a, b) => {
+      if (!a.pickupDate || !b.pickupDate) return 0
+      return new Date(b.pickupDate).getTime() - new Date(a.pickupDate).getTime()
+    })
   }, [orders, selectedStatus, searchTerm, dateFilter])
 
   const clearFilters = () => {

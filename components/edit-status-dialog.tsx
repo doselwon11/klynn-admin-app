@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Order } from "@/lib/data"
 import { useState } from "react"
 import { useToast } from "./ui/use-toast"
-import { updateOrderStatusWithNotification } from "@/lib/operations"
+import { updateOrderStatusClient } from "@/lib/operations-client"
 
 const statuses = ["processing", "approved", "picked-up", "at-laundry", "out-for-delivery", "delivered", "cancelled"]
 
@@ -36,14 +36,14 @@ export function EditStatusDialog({
     setIsSaving(true)
     
     // Use the new function that also sends rider notification when status becomes "approved"
-    const result = await updateOrderStatusWithNotification(order.rowNum, newStatus, {
-      pickupAddress: order.pickupAddress,
-      postcode: order.postcode || "",
-      deliveryType: order.deliveryType || order.service || "Standard",
-      orderType: order.orderType || "Regular",
-      riderFee: order.riderFee,
-      riderPayout: order.riderPayout,
-      date: order.pickupDate,
+    const result = await updateOrderStatusClient(order.id, newStatus, {
+      pickupAddress: order.pickupAddress ?? "",
+      postcode: order.postcode ?? "",
+      deliveryType: order.deliveryType ?? order.service ?? "Standard",
+      orderType: order.orderType ?? "Regular",
+      riderFee: order.riderFee ?? 0,
+      riderPayout: order.riderPayout ?? 0,
+      date: order.pickupDate ?? "",
     })
     
     if (result.success) {

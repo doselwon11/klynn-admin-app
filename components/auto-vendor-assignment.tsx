@@ -65,13 +65,13 @@ export function AutoVendorAssignment({ order, onUpdate }: AutoVendorAssignmentPr
       }
 
       // Extract postcode from pickup address
-      const customerPostcode = order.pickupAddress.match(/\d{5}/)?.[0] || ""
+      const customerPostcode = order.pickupAddress?.match(/\d{5}/)?.[0] || ""
       const serviceType = order.service || "standard"
 
       console.log(`🎯 Enhanced assignment for Order ${order.id}:`)
-      console.log(`   📍 Postcode: ${customerPostcode}`)
-      console.log(`   🛍️ Service: ${serviceType}`)
-      console.log(`   📍 GPS: ${order.coordinates ? `${order.coordinates[0]}, ${order.coordinates[1]}` : "None"}`)
+      console.log(`📍 Postcode: ${customerPostcode}`)
+      console.log(`🛍️ Service: ${serviceType}`)
+      console.log(`📍 GPS: ${order.coordinates ? `${order.coordinates[0]}, ${order.coordinates[1]}` : "None"}`)
 
       // Use enhanced vendor selection logic
       const suggestedVendor = findOptimalVendor(customerPostcode, order.coordinates, serviceType, vendors)
@@ -84,7 +84,7 @@ export function AutoVendorAssignment({ order, onUpdate }: AutoVendorAssignmentPr
       console.log(`✅ Enhanced assignment result: ${suggestedVendor.name} (${suggestedVendor.area})`)
 
       // Send auto-assignment to webhook
-      const result = await autoAssignVendor(order.rowNum, suggestedVendor.name, customerPostcode)
+      const result = await autoAssignVendor(order.id, suggestedVendor.name, customerPostcode)
 
       if (result.success) {
         // Determine assignment reason for user feedback
@@ -158,7 +158,7 @@ export function AutoVendorAssignment({ order, onUpdate }: AutoVendorAssignmentPr
       <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 px-2 py-1 rounded">
         <CheckCircle className="h-3 w-3" />
         <span>Smart vendor auto-assigned</span>
-        {order.coordinates && <MapPin className="h-3 w-3 ml-1" title="GPS-based assignment" />}
+        {order.coordinates && <MapPin className="h-3 w-3 ml-1" />}
       </div>
     )
   }

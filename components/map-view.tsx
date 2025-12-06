@@ -278,7 +278,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
         const popupContent = `
           <div style="min-width: 250px; font-family: system-ui;">
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #1f2937;">
-              ${order.customer.name}
+              ${order.customer?.name || 'Unknown'}
             </div>
             <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
               ${order.pickupAddress}
@@ -322,7 +322,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
               GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 8px;">
-              <button onclick="window.open('tel:${order.customer.phone}', '_self')" style="
+              <button onclick="window.open('tel:${order.customer?.phone}', '_self')" style="
                 background: #3b82f6;
                 color: white;
                 border: none;
@@ -332,7 +332,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
                 cursor: pointer;
                 font-weight: 500;
               ">📞 Call</button>
-              <button onclick="window.open('https://wa.me/${order.customer.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${order.customer.name}, this is Klynn Partners. We're on our way to collect your laundry order ${order.id}. Thank you!`)}', '_blank')" style="
+              <button onclick="window.open('https://wa.me/${order.customer?.phone?.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${order.customer?.name || 'Customer'}, this is Klynn Partners. We're on our way to collect your laundry order ${order.id}. Thank you!`)}', '_blank')" style="
                 background: #10b981;
                 color: white;
                 border: none;
@@ -344,7 +344,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
               ">💬 WhatsApp</button>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-              <button onclick="window.mapNavigateToCustomer && window.mapNavigateToCustomer(${lat}, ${lng}, '${order.customer.name}')" style="
+              <button onclick="window.mapNavigateToCustomer && window.mapNavigateToCustomer(${lat}, ${lng}, '${order.customer?.name || 'Customer'}')" style="
                 background: #8b5cf6;
                 color: white;
                 border: none;
@@ -561,7 +561,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
   const handleNavigate = (order: Order) => {
     if (order.coordinates && order.coordinates.length >= 2) {
       const [lat, lng] = order.coordinates
-      openMapsNavigation(lat, lng, order.customer.name)
+      openMapsNavigation(lat, lng, order.customer?.name || 'Customer')
     }
   }
 
@@ -1008,7 +1008,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
                           }}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-bold text-sm text-gray-900">{order.customer.name}</span>
+                            <span className="font-bold text-sm text-gray-900">{order.customer?.name || 'Unknown'}</span>
                             <Badge
                               variant="outline"
                               className="text-xs font-medium"
@@ -1029,7 +1029,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
                               className="flex-1 text-xs h-7 bg-transparent hover:bg-blue-50 border-blue-200 hover:border-blue-300 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                handleCall(order.customer.phone)
+                                handleCall(order.customer?.phone || '')
                               }}
                             >
                               <Phone className="w-3 h-3 mr-1" />
@@ -1041,7 +1041,7 @@ export function MapView({ orders, selectedArea, onOrderUpdate }: MapViewProps) {
                               className="flex-1 text-xs h-7 bg-transparent hover:bg-green-50 border-green-200 hover:border-green-300 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                handleWhatsApp(order.customer.phone, order.customer.name, order.id)
+                                handleWhatsApp(order.customer?.phone || '', order.customer?.name || 'Customer', order.id)
                               }}
                             >
                               <MessageCircle className="w-3 h-3 mr-1" />
