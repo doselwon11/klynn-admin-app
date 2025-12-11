@@ -74,7 +74,7 @@ export function AutoVendorAssignment({ order, onUpdate }: AutoVendorAssignmentPr
       console.log(`📍 GPS: ${order.coordinates ? `${order.coordinates[0]}, ${order.coordinates[1]}` : "None"}`)
 
       // Use enhanced vendor selection logic
-      const suggestedVendor = findOptimalVendor(customerPostcode, order.coordinates, serviceType, vendors)
+      const suggestedVendor = findOptimalVendor(customerPostcode, order.coordinates || undefined, serviceType, vendors)
 
       if (!suggestedVendor) {
         console.log("No suitable vendor found for enhanced auto-assignment")

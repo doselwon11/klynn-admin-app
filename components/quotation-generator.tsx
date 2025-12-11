@@ -537,10 +537,10 @@ export function QuotationGenerator({ isOpen, setIsOpen, order }: QuotationGenera
                     <span className="font-medium text-green-600">RM {order.price.toFixed(2)}</span>
                   </div>
                 )}
-                {order.extraDistanceFare !== undefined && order.extraDistanceFare > 0 && (
+                {order.extraDistanceFare != null && order.extraDistanceFare > 0 && (
                   <div>
                     <span className="text-gray-500 block">Extra Distance</span>
-                    <span className="font-medium text-orange-600">RM {order.extraDistanceFare.toFixed(2)}</span>
+                    <span className="font-medium text-orange-600">RM {order.extraDistanceFare!.toFixed(2)}</span>
                   </div>
                 )}
                 {order.saRiderName && (
@@ -555,10 +555,10 @@ export function QuotationGenerator({ isOpen, setIsOpen, order }: QuotationGenera
                     <span className="font-medium">{order.rdRiderName}</span>
                   </div>
                 )}
-                {order.riderPayout !== undefined && order.riderPayout > 0 && (
+                {order.riderPayout != null && order.riderPayout > 0 && (
                   <div>
                     <span className="text-gray-500 block">Rider Payout</span>
-                    <span className="font-medium text-blue-600">RM {order.riderPayout.toFixed(2)}</span>
+                    <span className="font-medium text-blue-600">RM {order.riderPayout!.toFixed(2)}</span>
                   </div>
                 )}
               </div>

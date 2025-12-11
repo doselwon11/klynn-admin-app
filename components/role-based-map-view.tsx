@@ -33,7 +33,7 @@ const filterOrdersByRole = (orders: Order[], userRole: string, userName: string)
       return orders.filter((order) => {
         const deliveryStatuses = ["picked-up", "out-for-delivery", "delivered"]
         const isInDeliveryPhase = deliveryStatuses.includes(order.status.toLowerCase())
-        const isAssignedToRider = order.riderId === userName || order.saRiderName === userName || order.rdRiderName === userName
+        const isAssignedToRider = order.saRiderName === userName || order.rdRiderName === userName
         return isInDeliveryPhase || isAssignedToRider
       })
 

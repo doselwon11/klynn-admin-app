@@ -94,7 +94,7 @@ function OrderItem({
     setIsUpdatingStatus(true)
 
     try {
-      console.log("🚚 Confirming pickup for order:", order.id, "Row:", order.rowNum)
+      console.log("🚚 Confirming pickup for order:", order.id)
 
       // Call the database update function with proper error handling
       const result = await updateOrderStatusWithNotification(order.id, "picked-up")
@@ -218,7 +218,7 @@ function OrderItem({
                   <div className="flex items-center gap-1">
                     <div
                       className="w-3 h-3 rounded-full border border-gray-300"
-                      style={{ backgroundColor: order.vendorColor }}
+                      style={{ backgroundColor: '#6b7280' }}
                       title={`Assigned to ${order.assignedVendor}`}
                     />
                     <span className="text-xs text-gray-500">{order.assignedVendor}</span>
@@ -387,7 +387,7 @@ function OrderItem({
                   <div className="flex items-center gap-2">
                     <div
                       className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
-                      style={{ backgroundColor: order.vendorColor }}
+                      style={{ backgroundColor: '#6b7280' }}
                     />
                     <span>
                       Assigned to <strong>{order.assignedVendor}</strong>
@@ -431,7 +431,7 @@ function OrderItem({
                     )}
 
                     {/* Extra Distance Fare */}
-                    {order.extraDistanceFare !== undefined && order.extraDistanceFare > 0 && (
+                    {order.extraDistanceFare != null && order.extraDistanceFare > 0 && (
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">Extra Distance:</span>
                         <span className="font-medium text-orange-600">RM {order.extraDistanceFare.toFixed(2)}</span>
@@ -439,7 +439,7 @@ function OrderItem({
                     )}
 
                     {/* Rider Fee */}
-                    {order.riderFee !== undefined && order.riderFee > 0 && (
+                    {order.riderFee != null && order.riderFee > 0 && (
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">Rider Fee:</span>
                         <span className="font-medium">RM {order.riderFee.toFixed(2)}</span>
@@ -488,14 +488,7 @@ function OrderItem({
                         <span className="font-medium">{order.rdRiderName || "-"}</span>
                       </div>
 
-                      {/* Rider ID */}
-                      {order.riderId && (
-                        <div className="flex items-center gap-2">
-                          <IdCard className="w-3 h-3 text-gray-400" />
-                          <span className="text-gray-500">Rider ID:</span>
-                          <span className="font-medium">{order.riderId}</span>
-                        </div>
-                      )}
+
 
                       {/* Region */}
                       <div className="flex items-center gap-2">
@@ -545,7 +538,7 @@ function OrderItem({
                       <div className="flex items-center gap-2">
                         <div
                           className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
-                          style={{ backgroundColor: order.vendorColor }}
+                          style={{ backgroundColor: '#6b7280' }}
                         />
                         <span className="text-sm font-medium text-gray-800">
                           Deliver to: <strong>{order.assignedVendor}</strong>

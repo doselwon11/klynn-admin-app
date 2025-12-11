@@ -80,7 +80,7 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
         return true
       case "rider":
         const deliveryStatuses = ["picked-up", "out-for-delivery", "delivered"]
-        return deliveryStatuses.includes(order.status.toLowerCase()) || order.riderId === user.name || order.saRiderName === user.name || order.rdRiderName === user.name
+        return deliveryStatuses.includes(order.status.toLowerCase()) || order.saRiderName === user.name || order.rdRiderName === user.name
       case "vendor":
         return order.assignedVendor === user.name
       default:
@@ -136,18 +136,11 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
     try {
       const updates = []
 
-      // Validate row number
-      if (!order.rowNum || isNaN(order.rowNum)) {
-        console.error("❌ Invalid row number:", order.rowNum)
-        alert("Error: Invalid order row number. Cannot update database.")
-        return
-      }
-
-      console.log(`🔄 ${user.role} updating order ${order.id} (Row ${order.rowNum})`)
+      console.log(`🔄 ${user.role} updating order ${order.id}`)
 
       // Update vendor assignment if changed (superhost only)
       if (canAssignVendors && selectedVendor && selectedVendor !== order.assignedVendor) {
-        console.log(`🏭 Assigning vendor: ${selectedVendor} to row ${order.rowNum}`)
+        console.log(`🏭 Assigning vendor: ${selectedVendor} to order ${order.id}`)
         const vendorResult = await assignVendor(order.id, selectedVendor)
         updates.push(vendorResult)
         console.log(`🏭 Vendor assignment result:`, vendorResult)
@@ -155,7 +148,7 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
 
       // Update status if changed and user has permission
       if (canUpdateStatus && selectedStatus !== order.status) {
-        console.log(`📊 Updating status: ${selectedStatus} for row ${order.rowNum}`)
+        console.log(`📊 Updating status: ${selectedStatus} for order ${order.id}`)
         const statusResult = await updateOrderStatusWithNotification(order.id, selectedStatus)
         updates.push(statusResult)
         console.log(`📊 Status update result:`, statusResult)
@@ -233,7 +226,7 @@ export function RoleBasedOrderPopup({ order, isOpen, onClose, onUpdate }: RoleBa
                 📋 Order #{order.id}
                 <Badge className="bg-white/20 text-white text-xs">{user.role.toUpperCase()}</Badge>
               </CardTitle>
-              <p className="text-blue-100 text-sm">Row {order.rowNum}</p>
+              <p className="text-blue-100 text-sm">Order Details</p>
             </div>
             <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
               <X className="w-5 h-5" />

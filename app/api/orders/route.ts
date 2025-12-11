@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
+import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { getOrders } from "@/lib/data"
 
 export const dynamic = "force-dynamic"
@@ -8,20 +9,29 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status")
 
   try {
+    // Fetch raw orders using supabaseAdmin (bypass RLS)
+    let query = supabaseAdmin
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false })
+
+    if (status && status.trim()) {
+      query = query.eq("status", status)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error("supabaseAdmin error:", error)
+      return NextResponse.json({ orders: [] }, { status: 500 })
+    }
+
+    // Transform rows → UI format
     const orders = await getOrders(status)
 
-    const response = NextResponse.json({ orders })
-
-    // Add strong cache prevention headers
-    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
-    response.headers.set("Pragma", "no-cache")
-    response.headers.set("Expires", "0")
-    response.headers.set("Surrogate-Control", "no-store")
-    response.headers.set("Vary", "*")
-
-    return response
-  } catch (error) {
-    console.error("API Error fetching orders from Klynn Database:", error)
-    return NextResponse.json({ message: "Failed to fetch orders" }, { status: 500 })
+    return NextResponse.json({ orders })
+  } catch (err) {
+    console.error("API error:", err)
+    return NextResponse.json({ orders: [] }, { status: 500 })
   }
 }

@@ -22,7 +22,7 @@ export function VendorFilter({ orders, onFilterChange, user, isHistory }: Vendor
 
     orders.forEach((order) => {
       const vendor = order.assignedVendor || "Unassigned"
-      const existing = stats.get(vendor) || { color: order.vendorColor || "#94a3b8", count: 0 }
+      const existing = stats.get(vendor) || { color: "#94a3b8", count: 0 }
       stats.set(vendor, { ...existing, count: existing.count + 1 })
     })
 

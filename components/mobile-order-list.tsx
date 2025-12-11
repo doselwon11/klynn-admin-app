@@ -77,7 +77,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
     setIsUpdatingStatus(true)
 
     try {
-      console.log("🚚 Confirming pickup for order:", order.id, "Row:", order.rowNum)
+      console.log("🚚 Confirming pickup for order:", order.id)
 
       // Call the database update function with proper error handling
       const result = await updateOrderStatusWithNotification(order.id, "picked-up")
@@ -192,7 +192,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
                 <div className="flex items-center gap-1">
                   <div
                     className="w-3 h-3 rounded-full border border-gray-300"
-                    style={{ backgroundColor: order.vendorColor }}
+                    style={{ backgroundColor: '#6b7280' }}
                     title={`Assigned to ${order.assignedVendor}`}
                   />
                   <span className="text-xs text-gray-500 truncate max-w-20">{order.assignedVendor}</span>
@@ -324,7 +324,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
                 <div className="flex items-center gap-2 min-w-0">
                   <div
                     className="w-4 h-4 rounded-full border-2 border-white shadow-sm shrink-0"
-                    style={{ backgroundColor: order.vendorColor }}
+                    style={{ backgroundColor: '#6b7280' }}
                   />
                   <span className="truncate">
                     Assigned to <strong>{order.assignedVendor}</strong>
@@ -433,7 +433,7 @@ function MobileOrderItem({ order, onStatusChange }: MobileOrderItemProps) {
                     <div className="flex items-center gap-2">
                       <div
                         className="w-3 h-3 rounded-full border border-white shadow-sm"
-                        style={{ backgroundColor: order.vendorColor }}
+                        style={{ backgroundColor: '#6b7280' }}
                       />
                       <span className="text-xs font-medium text-gray-800">
                         Deliver to: <strong>{order.assignedVendor}</strong>

@@ -116,10 +116,7 @@ export function OrderPopup({ order, isOpen, onClose, onUpdate }: OrderPopupProps
   const { user } = userContext
 
   const handleUpdate = async () => {
-    if (!order.rowNum) {
-      alert("Cannot update: Missing row information")
-      return
-    }
+
 
     setIsUpdating(true)
     try {
@@ -143,7 +140,7 @@ export function OrderPopup({ order, isOpen, onClose, onUpdate }: OrderPopupProps
 
       // Handle vendor assignment first if changed
       if (hasVendorChange) {
-        console.log("🏭 Assigning vendor:", formData.vendor, "to row:", order.rowNum)
+        console.log("🏭 Assigning vendor:", formData.vendor, "to order:", order.id)
         const vendorResult = await assignVendor(order.id, formData.vendor)
         if (!vendorResult.success) {
           alert(`Failed to assign vendor: ${vendorResult.message}`)

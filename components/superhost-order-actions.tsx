@@ -174,8 +174,8 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
           postcode: order.postcode || "",
           deliveryType: order.deliveryType || order.service || "Standard",
           orderType: order.orderType || "Regular",
-          riderFee: order.riderFee,
-          riderPayout: order.riderPayout,
+          riderFee: order.riderFee ?? undefined,
+          riderPayout: order.riderPayout ?? undefined,
           date: order.pickupDate || "",
         }).then((result: { success: boolean; message: string }) => {
           if (!result.success) {
@@ -483,7 +483,7 @@ export function SuperhostOrderActions({ order, onUpdate }: SuperhostOrderActions
                 <div className="flex items-center gap-2 mb-1">
                   <div
                     className="w-3 h-3 rounded-full border border-gray-300"
-                    style={{ backgroundColor: order.vendorColor }}
+                    style={{ backgroundColor: '#6b7280' }}
                   />
                   <span className="text-xs font-medium text-gray-800">Currently Assigned</span>
                 </div>
