@@ -11,16 +11,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 🔥 THIS USES THE SERVICE ROLE AND BYPASSES RLS
+  // THIS USES THE SERVICE ROLE AND BYPASSES RLS
   const { error } = await supabaseServer
     .from("orders")
     .update({ status: newStatus })
     .eq("id", orderId);
 
   if (error) {
-    console.error("❌ Failed updating order:", error);
+    console.error("Failed updating order:", error);
     return NextResponse.json(
-      { success: false, message: "Supabase update failed" },
+      { success: false, message: "❌ Supabase update failed" },
       { status: 500 }
     );
   }
