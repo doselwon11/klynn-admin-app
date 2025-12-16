@@ -62,9 +62,8 @@ Create a `.env.local` file in the root directory with the following variables:
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://aerbkrsskxbsvjattofq.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcmJrcnNza3hic3ZqYXR0b2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NzM1MDIsImV4cCI6MjA4MDQ0OTUwMn0.OUVlzVxdy_DgHi9redKhp5YweH0oCg3kH7BFFQsP6m4 
-
-Note: SUPABASE_SERVICE_ROLE_KEY is not allowed to be shared for security reasons. It is illegal and dangerous to distribute this key.
 ```
+**Note**: I am not allowed to share `SUPABASE_SERVICE_ROLE_KEY` for security reasons. It is illegal and dangerous to distribute this key.
 ### 3️⃣ Start the Development Server
 
 ```
@@ -111,5 +110,6 @@ Vendor
 
 This repository intentionally omits sensitive credentials.
 All architectural decisions follow industry security standards.
+
 
 Thank you for reviewing this project.
